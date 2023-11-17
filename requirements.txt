@@ -3,4 +3,4 @@ openai
 google-api-python-client
 requests
 beautifulsoup4
-pyautogui
+pyautogen

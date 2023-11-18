@@ -161,7 +161,7 @@ if user_input:
     st.session_state.messages.append({'role':'user','content':user_input})
     config = [{"model": "gpt-4", "api_key": openai.api_key}]
     llm_config = {"config_list": config, "temperature": 0.1}
-    if st.session_state.junior_doctor_mode:
+    if st.session_state.junior_doctor_mode==True:
         tokens = symptoms(user_input)
         jun_doc_mode(tokens, user_input)
         with st.chat_message("assistant"):
@@ -175,6 +175,7 @@ if user_input:
         give_remedy(tokens)
     elif ans == "Yes":
         tokens = symptoms(user_input)
+        st.session_state.junior_doctor_mode=True
         jun_doc_mode(tokens, user_input)
         with st.chat_message("assistant"):
             st.markdown("Advice while waiting for the doctor:")

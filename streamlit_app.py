@@ -14,9 +14,9 @@ if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
 class TrackableUserProxyAgent(AssistantAgent):
     def _process_received_message(self, message, sender, silent):
-        with st.chat_message('Junior Doc'):
+        with st.chat_message('assistant'):
             st.markdown(message['content'])
-            st.session_state['chat_history'].append({'user': message['content']})
+            st.session_state['chat_history'].append({'assistant': message['content']})
         return super()._process_received_message(message, sender, silent)
     # def get_human_input(self,prompt):
     #     user_input = st.session_state.get('user_input', '
@@ -126,7 +126,7 @@ def jun_doc_mode(tokens, user_input):
                                         )
 
     grp_chat = autogen.GroupChat(agents=[junior_doc, human_user, terminator], messages=[], max_round=50)
-    manager = TrackableGroupChatManager(groupchat=grp_chat, llm_config=llm_config,
+    manager = autogen.GroupChatManager(groupchat=grp_chat, llm_config=llm_config,
                                        is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
                                        system_message="""
       Reply TERMINATE once the junior_doc says THANK YOU""")

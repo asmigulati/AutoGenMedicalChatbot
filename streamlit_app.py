@@ -113,7 +113,7 @@ def give_remedy(tokens):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         full_response = ""
-        for response in client.chat.completions.create(
+        for response in openai.ChatCompletion.create(
                 model="gpt-3.5-turbo-16k",
                 temperature=0.2,
                 messages=[

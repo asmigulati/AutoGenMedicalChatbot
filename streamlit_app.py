@@ -99,8 +99,13 @@ def give_remedy(tokens):
                 ],
                 stream=True
         ):
-            full_response += (response.choices[0].delta.content or "")
-            message_placeholder.markdown(full_response + "▌")
+            try:
+                full_response += (response.choices[0].delta.content or "")
+                message_placeholder.markdown(full_response + "▌")
+            except:
+                full_response += ""
+                message_placeholder.markdown(full_response + "▌")
+            
         message_placeholder.markdown(full_response)
 
 

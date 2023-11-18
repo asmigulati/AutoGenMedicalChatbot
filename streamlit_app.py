@@ -14,14 +14,14 @@ st.write("""# Healthcare Chatbot""")
 class TrackableAssistantAgent(AssistantAgent):
     def _process_received_message(self, message, sender, silent):
         with st.chat_message(sender.name):
-            st.markdown(message)
+            st.markdown(message['content'])
         return super()._process_received_message(message, sender, silent)
 
 
 class TrackableUserProxyAgent(UserProxyAgent):
     def _process_received_message(self, message, sender, silent):
         with st.chat_message(sender.name):
-            st.markdown(message)
+            st.markdown(message['content'])
         return super()._process_received_message(message, sender, silent)
 
 
@@ -139,13 +139,16 @@ def jun_doc_mode(tokens, user_input):
     # Create an event loop
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+   
 
     # Define an asynchronous function
     async def initiate_chat():
-        await human_user.a_initiate_chat(
-            manager,
-            message=user_input,
-        )
+        user_input = st.chat_input("What is up?")
+        if user_input:
+            await human_user.a_initiate_chat(
+                manager,
+                message=user_input,
+            )
 
     # Run the asynchronous function within the event loop
     loop.run_until_complete(initiate_chat())

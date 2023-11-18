@@ -7,54 +7,47 @@ import sys
 import autogen
 from autogen import UserProxyAgent, ConversableAgent, oai, config_list_from_json, AssistantAgent
 
+st.write("""# AutoGen Chat Agents""")
+
+class TrackableAssistantAgent(AssistantAgent):
+    def _process_received_message(self, message, sender, silent):
+        with st.chat_message(sender.name):
+            st.markdown(message)
+        return super()._process_received_message(message, sender, silent)
+
+
+class TrackableUserProxyAgent(UserProxyAgent):
+    def _process_received_message(self, message, sender, silent):
+        with st.chat_message(sender.name):
+            st.markdown(message)
+        return super()._process_received_message(message, sender, silent)
 # Load your API key from Streamlit secrets
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-# Initialize session state for chat history
-if 'chat_history' not in st.session_state:
-    st.session_state['chat_history'] = []
-
-def add_to_chat(user_type, message):
-    st.session_state['chat_history'].append((user_type, message))
-
-def display_chat():
-    for user_type, message in st.session_state['chat_history']:
-        if user_type == "user":
-            st.text_area("", value=message, key=message, height=50, disabled=True, style={"text-align": "right"})
-        else:
-            st.text_area("", value=message, key=message, height=50, disabled=True)
+openai.api_key = st.secrets["OPENAI_API_KEY"] #come back to it
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 
-# Streamlit app layout
-def main():
-    st.title("Health Chatbot")
-    display_chat()
 
-    # User input
-    with st.form("user_input_form", clear_on_submit=True):
-        user_input = st.text_input("How are you feeling today?", key="user_input")
-        submit_button = st.form_submit_button("Submit")
+with st.container():
+     user_input = st.chat_input("What is up?")
+     if user_input:
+         with st.chat_message("user"):
+             st.markdown(prompt)         
+     config= [{"model":"gpt-4", "api_key": api_key}]
+     llm_config= {"config_list": config, "temperature": 0.1}
+     ans, user_input = assess_symp(user_input)
+     if ans=="No":
+        tokens= symptoms(user_input)
+        give_remedy(tokens)
+     elif ans == "Yes":
+        tokens = symptoms(user_input)
+        jun_doc_mode(tokens, user_input)
+        with st.chat_message("assistant"):
+            st.markdown("Advice while waiting for the doctor:")
+        remedies = give_remedy(tokens)
+        with st.chat_message("assistant"):
+            st.markdown(remedies)
+    
 
-    if submit_button and user_input:
-        add_to_chat("user", user_input)
-        
-        # Process the input and get responses
-        ans, user_input = assess_symp(user_input)
-        add_to_chat("bot", ans)
-
-        if ans == "No":
-            tokens = symptoms(user_input)
-            remedies = give_remedy(tokens)
-            add_to_chat("bot", remedies)
-        elif ans == "Yes":
-            tokens = symptoms(user_input)
-            jun_doc_mode(tokens, user_input)
-            add_to_chat("bot", "Advice while waiting for the doctor:")
-            remedies = give_remedy(tokens)
-            add_to_chat("bot", remedies)
-        else:
-            add_to_chat("bot", ans)
-
-        display_chat()
 
 # Define your functions here: assess_symp, symptoms, home_remedies, give_remedy, jun_doc_mode, etc.
 def assess_symp(symptom):
@@ -107,37 +100,36 @@ def home_remedies(tokens):
 
 def give_remedy(tokens):
   texts= str(home_remedies(tokens))
-  for response in openai.ChatCompletion.create(
-    model="gpt-3.5-turbo-16k",
-    temperature= 0.2,
-    messages=[
-    {"role": "system", "content": f"Act like a medical advisor and based on the given symptoms: {tokens} suggest what the patient can do to get better at home and how they can monitor their symptoms, do not state what might be the cause of it. provide the source from which you are extracting the remedy."},
-    {"role": "user", "content": texts}
-    ],
-    stream=True
-  ):
-    try:
-      print(response.choices[0].delta.content, end="")
-    except:
-      print("")
+  with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        full_response = ""
+        for response in client.chat.completions.create(
+        model="gpt-3.5-turbo-16k",
+        temperature= 0.2,
+        messages=[
+        {"role": "system", "content": f"Act like a medical advisor and based on the given symptoms: {tokens} suggest what the patient can do to get better at home and how they can monitor their symptoms, do not state what might be the cause of it. provide the source from which you are extracting the remedy."},
+        {"role": "user", "content": texts}
+        ],
+        stream=True
+        ):
+            full_response += (response.choices[0].delta.content or "")
+            message_placeholder.markdown(full_response + "▌")
+        message_placeholder.markdown(full_response)
+            
 def jun_doc_mode(tokens, user_input):
   hist_dict={}
   autogen.ChatCompletion.start_logging(history_dict=hist_dict)
-  junior_doc = autogen.AssistantAgent(
-      name="junior_doc",
-      llm_config = llm_config,
-      is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE") or x.get("content", "").strip() == "",
-      system_message =f" act like a medical assitant and ask appropriate, relevant follow up questions ONE AT A TIME to the human_user based on the symptoms {tokens} they mentioned, for example how long they have had it for, and other symptom they noticed, how severe it is and any other relevant question. you should employ a structured approach to gather the patient's clinical history, which might involve asking questions about symptoms, medical history, medications, allergies, and recent changes in health. take into consideration what has already been asked in the context that is provided to you and what info you've already gathered and then tread accordingly. Ask questions one by one, you will be given all the previous question you asked: {str(hist_dict)} once you are done asking questions, and have gathered enough information say THANK YOU and end the entire message with a TERMINATE",
-  )
-
-  human_user=autogen.UserProxyAgent(
-      name = "human_user",
-      human_input_mode = "ALWAYS",
-      max_consecutive_auto_reply = 1,
-      is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
-      system_message = """
-      Reply TERMINATE once the junior_doc says THANK YOU"""
-  )
+  junior_doc=TrackableAssistantAgent(name="junior_doc",
+    llm_config = llm_config,
+    is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE") or x.get("content", "").strip() == "",
+    system_message =f"act like a medical assitant and ask appropriate, relevant follow up questions ONE AT A TIME to the human_user based on the symptoms {tokens} they mentioned, for example how long they have had it for, and other symptom they noticed, how severe it is and any other relevant question. you should employ a structured approach to gather the patient's clinical history, which might involve asking questions about symptoms, medical history, medications, allergies, and recent changes in health. take into consideration what has already been asked in the context that is provided to you and what info you've already gathered and then tread accordingly. Ask questions one by one, you will be given all the previous question you asked: {str(hist_dict)} once you are done asking questions, and have gathered enough information say THANK YOU and end the entire message with a TERMINATE",)
+  human_user=TrackableUserProxyAgent(
+    name = "human_user",
+    human_input_mode = "ALWAYS",
+    max_consecutive_auto_reply = 1,
+    is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
+    system_message = """
+    Reply TERMINATE once the junior_doc says THANK YOU""")
   terminator=autogen.UserProxyAgent("terminator",
                                     system_message="Your job is to terminate the chat if the doctor says THANK YOU or TERMINATE ",
                                     human_input_mode="NEVER",
@@ -148,11 +140,17 @@ def jun_doc_mode(tokens, user_input):
   manager = autogen.GroupChatManager(groupchat=grp_chat, llm_config=llm_config, is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
       system_message = """
       Reply TERMINATE once the junior_doc says THANK YOU""")
-  human_user.initiate_chat(
-      manager,message=user_input,
-  )
+    # Create an event loop
+  loop = asyncio.new_event_loop()
+  asyncio.set_event_loop(loop)
+    
+    # Define an asynchronous function
+  async def initiate_chat():
+      await human_user.a_initiate_chat(
+            manager,
+            message=user_input,
+        )
+    
+# Run the asynchronous function within the event loop
+  loop.run_until_complete(initiate_chat())
 
-
-
-if __name__ == "__main__":
-    main()

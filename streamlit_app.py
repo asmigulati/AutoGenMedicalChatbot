@@ -10,13 +10,19 @@ from autogen import UserProxyAgent, ConversableAgent, oai, config_list_from_json
 
 st.write("""# Healthcare Chatbot""")
 # Initialize session state for chat history
-if 'chat_history' not in st.session_state:
-    st.session_state['chat_history'] = []
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
 class TrackableUserProxyAgent(AssistantAgent):
     def _process_received_message(self, message, sender, silent):
         with st.chat_message('assistant'):
             st.markdown(message['content'])
-            st.session_state['chat_history'].append({'assistant': message['content']})
+            st.session_state.messages.append({'role': 'assistant', 'content': message['content']})
         return super()._process_received_message(message, sender, silent)
     # def get_human_input(self,prompt):
     #     user_input = st.session_state.get('user_input', '
@@ -110,7 +116,7 @@ def jun_doc_mode(tokens, user_input):
                                          llm_config=llm_config,
                                          is_termination_msg=lambda x: x.get("content", "").rstrip().endswith(
                                              "TERMINATE") or x.get("content", "").strip() == "",
-                                         system_message=f"act like a medical assitant and ask appropriate, relevant follow up questions ONE AT A TIME to the human_user based on the symptoms {tokens} they mentioned, for example how long they have had it for, and other symptom they noticed, how severe it is and any other relevant question. you should employ a structured approach to gather the patient's clinical history, which might involve asking questions about symptoms, medical history, medications, allergies, and recent changes in health. take into consideration what has already been asked in the context that is provided to you and what info you've already gathered and then tread accordingly. Ask questions one by one, you will be given all the previous question you asked: {str(st.session_state['chat_history'])} once you are done asking questions, and have gathered enough information say THANK YOU and end the entire message with a TERMINATE", )
+                                         system_message=f"act like a medical assitant and ask appropriate, relevant follow up questions ONE AT A TIME to the human_user based on the symptoms {tokens} they mentioned, for example how long they have had it for, and other symptom they noticed, how severe it is and any other relevant question. you should employ a structured approach to gather the patient's clinical history, which might involve asking questions about symptoms, medical history, medications, allergies, and recent changes in health. take into consideration what has already been asked in the context that is provided to you and what info you've already gathered and then tread accordingly. Ask questions one by one, you will be given all the previous question you asked: {str(st.session_state.nessages)} once you are done asking questions, and have gathered enough information say THANK YOU and end the entire message with a TERMINATE", )
     human_user = TrackableUserProxyAgent(
         name="human_user",
         human_input_mode="ALWAYS",
@@ -148,7 +154,7 @@ with st.container():
     hist_dict = {}
     user_input = st.chat_input("What is up?")
     if user_input:
-        st.session_state['chat_history'].append({'user': user_input})
+        st.session_state.messages.append({'role':'user','content':user_input})
         with st.chat_message("user"):
             st.markdown(user_input)
         config = [{"model": "gpt-4", "api_key": openai.api_key}]

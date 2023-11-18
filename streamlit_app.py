@@ -11,7 +11,12 @@ from autogen import UserProxyAgent, ConversableAgent, oai, config_list_from_json
 st.write("""# Healthcare Chatbot""")
 # Initialize session state for chat history
 if 'chat_history' not in st.session_state:
-    st.session_state['chat_history'] = []
+    for role, text in message.items():
+        with st.chat_message(role):
+        st.markdown(text)
+for message in st.session_state['chat_history']:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 class TrackableUserProxyAgent(AssistantAgent):
     def _process_received_message(self, message, sender, silent):
         with st.chat_message('assistant'):
@@ -145,8 +150,9 @@ def jun_doc_mode(tokens, user_input):
     # Run the asynchronous function within the event loop
     loop.run_until_complete(initiate_chat())
 with st.container():
-    hist_dict = {}
-    user_input = st.chat_input("What is up?")
+    with st.chat_message('assistant'):
+            st.markdown('How are you feeling today?')
+    user_input = st.chat_input("Say Something.....")
     if user_input:
         st.session_state['chat_history'].append({'user': user_input})
         with st.chat_message("user"):

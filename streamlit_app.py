@@ -24,7 +24,7 @@ class TrackableGroupChatManager(GroupChatManager):
 class TrackableUserProxyAgent(AssistantAgent):
     def _process_received_message(self, message, sender, silent):
         with st.chat_message('Junior Doc'):
-            st.markdown(message['conten'])
+            st.markdown(message['content'])
             st.session_state['chat_history'].append({'user': message['content']})
         return super()._process_received_message(message, sender, silent)
     # def get_human_input(self,prompt):

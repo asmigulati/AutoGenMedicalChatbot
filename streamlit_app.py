@@ -163,7 +163,7 @@ if user_input:
     with st.chat_message("user"):
         st.markdown(user_input)
     st.session_state.messages.append({'role':'user','content':user_input})
-    config = [{"model": "gpt-4", "api_key": openai.api_key}]
+    config = [{"api_key": openai.api_key,"engine":"Autogen","api_base":"https://asmi.openai.azure.com/","api_type":"azure","api_version":"2023-07-01-preview"}]
     llm_config = {"config_list": config, "temperature": 0.1}
     if st.session_state.junior_doctor_mode==True:
         tokens = symptoms(user_input)

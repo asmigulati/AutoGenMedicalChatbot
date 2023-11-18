@@ -28,6 +28,7 @@ class TrackableUserProxyAgent(AssistantAgent):
 # Load your API key from Streamlit secrets
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 openai.api_base = "https://asmi.openai.azure.com/"
+openai.api_type = "azure"
 # come back to it
 # Define your functions here: assess_symp, symptoms, home_remedies, give_remedy, jun_doc_mode, etc.
 def assess_symp(symptom):

@@ -124,7 +124,7 @@ def jun_doc_mode(tokens, user_input):
                                          is_termination_msg=lambda x: x.get("content", "").rstrip().endswith(
                                              "TERMINATE") or x.get("content", "").strip() == "",
                                          system_message=f"act like a medical assitant and ask appropriate, relevant follow up questions ONE AT A TIME to the human_user based on the symptoms {tokens} they mentioned, for example how long they have had it for, and other symptom they noticed, how severe it is and any other relevant question. you should employ a structured approach to gather the patient's clinical history, which might involve asking questions about symptoms, medical history, medications, allergies, and recent changes in health. take into consideration what has already been asked in the context that is provided to you and what info you've already gathered and then tread accordingly. Ask questions one by one, you will be given all the previous question you asked: {str(hist_dict)} once you are done asking questions, and have gathered enough information say THANK YOU and end the entire message with a TERMINATE", )
-    human_user = TrackableUserProxyAgent(
+    human_user = UserProxyAgent(
         name="human_user",
         human_input_mode="ALWAYS",
         max_consecutive_auto_reply=1,

@@ -159,11 +159,9 @@ def jun_doc_mode(tokens, user_input):
 
     # Define an asynchronous function
     async def initiate_chat():
-        user_input = st.chat_input("What is up?")
-        if user_input:
-            await human_user.a_initiate_chat(
-                manager,
-                message=user_input,
+        await human_user.a_initiate_chat(
+            manager,
+            message=user_input,
             )
 
     # Run the asynchronous function within the event loop

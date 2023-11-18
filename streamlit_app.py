@@ -28,14 +28,7 @@ class TrackableUserProxyAgent(AssistantAgent):
             st.session_state['chat_history'].append({'user': message['content']})
         return super()._process_received_message(message, sender, silent)
     # def get_human_input(self,prompt):
-    #     user_input = st.session_state.get('user_input', '')
-    def get_human_input(self, prompt):
-        # This function will now use Streamlit's chat_input to get user input
-        user_input = st.session_state.get('user_input', '')
-        if not user_input:
-            user_input = st.chat_input(prompt, key='user_input')
-            st.session_state['user_input'] = user_input
-        return user_input
+    #     user_input = st.session_state.get('user_input', '
     
 # Load your API key from Streamlit secrets
 openai.api_key = st.secrets["OPENAI_API_KEY"]  # come back to it

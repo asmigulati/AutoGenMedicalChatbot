@@ -149,35 +149,33 @@ def jun_doc_mode(tokens, user_input):
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-with st.container():
-    hist_dict = {}
-    with st.chat_message("assistant"):
-        st.markdown("How can I help you today?")
-    user_input = st.chat_input("What is up?")
-    if user_input:
-        st.session_state.messages.append({'role':'user','content':user_input})
-        config = [{"model": "gpt-4", "api_key": openai.api_key}]
-        llm_config = {"config_list": config, "temperature": 0.1}
-        if st.session_state.junior_doctor_mode:
-            tokens = symptoms(user_input)
-            jun_doc_mode(tokens, user_input)
-            with st.chat_message("assistant"):
-                st.markdown("Advice while waiting for the doctor:")
-            remedies = give_remedy(tokens)
-            with st.chat_message("assistant"):
-                st.markdown(remedies)
-        ans, user_input = assess_symp(user_input)
-        if ans == "No":
-            tokens = symptoms(user_input)
-            give_remedy(tokens)
-        elif ans == "Yes":
-            tokens = symptoms(user_input)
-            jun_doc_mode(tokens, user_input)
-            with st.chat_message("assistant"):
-                st.markdown("Advice while waiting for the doctor:")
-            remedies = give_remedy(tokens)
-            with st.chat_message("assistant"):
-                st.markdown(remedies)
+with st.chat_message("assistant"):
+    st.markdown("How can I help you today?")
+user_input = st.chat_input("What is up?")
+if user_input:
+    st.session_state.messages.append({'role':'user','content':user_input})
+    config = [{"model": "gpt-4", "api_key": openai.api_key}]
+    llm_config = {"config_list": config, "temperature": 0.1}
+    if st.session_state.junior_doctor_mode:
+        tokens = symptoms(user_input)
+        jun_doc_mode(tokens, user_input)
+        with st.chat_message("assistant"):
+            st.markdown("Advice while waiting for the doctor:")
+        remedies = give_remedy(tokens)
+        with st.chat_message("assistant"):
+            st.markdown(remedies)
+    ans, user_input = assess_symp(user_input)
+    if ans == "No":
+        tokens = symptoms(user_input)
+        give_remedy(tokens)
+    elif ans == "Yes":
+        tokens = symptoms(user_input)
+        jun_doc_mode(tokens, user_input)
+        with st.chat_message("assistant"):
+            st.markdown("Advice while waiting for the doctor:")
+        remedies = give_remedy(tokens)
+        with st.chat_message("assistant"):
+            st.markdown(remedies)
 
 
 

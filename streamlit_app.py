@@ -18,6 +18,8 @@ if "junior_doctor_mode" not in st.session_state:
 
 class TrackableUserProxyAgent(AssistantAgent):
     def _process_received_message(self, message, sender, silent):
+        with st.chat_message("assistant"):
+            st.markdown(message['content'])
         st.session_state.messages.append({'role': 'assistant', 'content': message['content']})
         return super()._process_received_message(message, sender, silent)
     # def get_human_input(self,prompt):

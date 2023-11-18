@@ -47,7 +47,7 @@ def assess_symp(symptom):
 
 def symptoms(symp):
     completion = openai.ChatCompletion.create(
-        engine="Autogen"
+        engine="Autogen",
         temperature=0.2,
         messages=[
             {"role": "system",

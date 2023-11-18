@@ -8,7 +8,7 @@ import sys
 import autogen
 from autogen import UserProxyAgent, ConversableAgent, oai, config_list_from_json, AssistantAgent
 
-st.write("""# AutoGen Chat Agents""")
+st.write("""# Healthcare Chatbot""")
 
 
 class TrackableAssistantAgent(AssistantAgent):

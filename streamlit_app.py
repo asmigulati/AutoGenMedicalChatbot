@@ -16,8 +16,16 @@ class TrackableAssistantAgent(AssistantAgent):
         with st.chat_message(sender.name):
             st.markdown(message['content'])
         return super()._process_received_message(message, sender, silent)
-
-
+    # def get_human_input(self,prompt):
+    #     user_input = st.session_state.get('user_input', '')
+    def get_human_input(self, prompt):
+        # This function will now use Streamlit's chat_input to get user input
+        user_input = st.session_state.get('user_input', '')
+        if not user_input:
+            user_input = st.chat_input(prompt, key='user_input')
+            st.session_state['user_input'] = user_input
+        return user_input
+    
 class TrackableUserProxyAgent(UserProxyAgent):
     def _process_received_message(self, message, sender, silent):
         with st.chat_message(sender.name):

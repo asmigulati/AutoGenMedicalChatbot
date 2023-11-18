@@ -94,7 +94,7 @@ def give_remedy(tokens):
         message_placeholder = st.empty()
         full_response = ""
         for response in openai.ChatCompletion.create(
-                engine="Autogen"
+                engine="Autogen",
                 temperature=0.2,
                 messages=[
                     {"role": "system",

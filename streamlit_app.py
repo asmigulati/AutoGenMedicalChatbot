@@ -146,9 +146,7 @@ def jun_doc_mode(tokens, user_input):
 
     # Run the asynchronous function within the event loop
     loop.run_until_complete(initiate_chat())
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+
 with st.chat_message("assistant"):
     st.markdown("How can I help you today?")
 user_input = st.chat_input("What is up?")
@@ -176,6 +174,9 @@ if user_input:
         remedies = give_remedy(tokens)
         with st.chat_message("assistant"):
             st.markdown(remedies)
+    for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
 
 

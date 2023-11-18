@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 import sys
 import autogen
-from autogen import UserProxyAgent, ConversableAgent, oai, config_list_from_json, AssistantAgent
+from autogen import UserProxyAgent, ConversableAgent, oai, config_list_from_json, AssistantAgent, GroupChatManager
 
 st.write("""# Healthcare Chatbot""")
 
@@ -18,6 +18,14 @@ class TrackableAssistantAgent(AssistantAgent):
         return super()._process_received_message(message, sender, silent)
     # def get_human_input(self,prompt):
     #     user_input = st.session_state.get('user_input', '')
+    def get_human_input(self, prompt):
+        # This function will now use Streamlit's chat_input to get user input
+        user_input = st.session_state.get('user_input', '')
+        if not user_input:
+            user_input = st.chat_input(prompt, key='user_input')
+            st.session_state['user_input'] = user_input
+        return user_input
+class TrackableGroupChatManager(GroupChatManager):
     def get_human_input(self, prompt):
         # This function will now use Streamlit's chat_input to get user input
         user_input = st.session_state.get('user_input', '')
@@ -140,7 +148,7 @@ def jun_doc_mode(tokens, user_input):
                                         )
 
     grp_chat = autogen.GroupChat(agents=[junior_doc, human_user, terminator], messages=[], max_round=50)
-    manager = autogen.GroupChatManager(groupchat=grp_chat, llm_config=llm_config,
+    manager = TrackableGroupChatManager(groupchat=grp_chat, llm_config=llm_config,
                                        is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
                                        system_message="""
       Reply TERMINATE once the junior_doc says THANK YOU""")

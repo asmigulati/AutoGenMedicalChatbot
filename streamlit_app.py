@@ -10,7 +10,9 @@ from autogen import UserProxyAgent, ConversableAgent, oai, config_list_from_json
 
 st.write("""# Healthcare Chatbot 🩺""")
 # Initialize session state for chat history
-
+# Create a Streamlit sidebar to input the API key
+st.sidebar.write("## API Key")
+api_key = st.sidebar.text_input("Enter your OpenAI API key:")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "junior_doctor_mode" not in st.session_state:
@@ -26,7 +28,10 @@ class TrackableUserProxyAgent(AssistantAgent):
     #     user_input = st.session_state.get('user_input', '
     
 # Load your API key from Streamlit secrets
-openai.api_key = st.secrets["OPENAI_API_KEY"]  # come back to it
+if api_key:
+    openai.api_key = api_key
+else:
+    st.warning("Please enter your OpenAI API key in the sidebar to use the app.")
 # Define your functions here: assess_symp, symptoms, home_remedies, give_remedy, jun_doc_mode, etc.
 def assess_symp(symptom):
     completion = openai.ChatCompletion.create(

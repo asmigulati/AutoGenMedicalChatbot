@@ -149,20 +149,20 @@ with st.container():
     if user_input:
         with st.chat_message("user"):
             st.markdown(user_input)
-    config = [{"model": "gpt-4", "api_key": openai.api_key}]
-    llm_config = {"config_list": config, "temperature": 0.1}
-    ans, user_input = assess_symp(user_input)
-    if ans == "No":
-        tokens = symptoms(user_input)
-        give_remedy(tokens)
-    elif ans == "Yes":
-        tokens = symptoms(user_input)
-        jun_doc_mode(tokens, user_input)
-        with st.chat_message("assistant"):
-            st.markdown("Advice while waiting for the doctor:")
-        remedies = give_remedy(tokens)
-        with st.chat_message("assistant"):
-            st.markdown(remedies)
+        config = [{"model": "gpt-4", "api_key": openai.api_key}]
+        llm_config = {"config_list": config, "temperature": 0.1}
+        ans, user_input = assess_symp(user_input)
+        if ans == "No":
+            tokens = symptoms(user_input)
+            give_remedy(tokens)
+        elif ans == "Yes":
+            tokens = symptoms(user_input)
+            jun_doc_mode(tokens, user_input)
+            with st.chat_message("assistant"):
+                st.markdown("Advice while waiting for the doctor:")
+            remedies = give_remedy(tokens)
+            with st.chat_message("assistant"):
+                st.markdown(remedies)
 
 
 

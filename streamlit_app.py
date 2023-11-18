@@ -34,7 +34,7 @@ openai.api_version = "2023-07-01-preview"
 # Define your functions here: assess_symp, symptoms, home_remedies, give_remedy, jun_doc_mode, etc.
 def assess_symp(symptom):
     completion = openai.ChatCompletion.create(
-        engine = "Autogen"
+        engine = "Autogen",
         temperature=0.2,
         messages=[
             {"role": "system",

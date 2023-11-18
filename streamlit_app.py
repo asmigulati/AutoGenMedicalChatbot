@@ -29,11 +29,12 @@ class TrackableUserProxyAgent(AssistantAgent):
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 openai.api_base = "https://asmi.openai.azure.com/"
 openai.api_type = "azure"
+openai.api_version = "2023-07-01-preview"
 # come back to it
 # Define your functions here: assess_symp, symptoms, home_remedies, give_remedy, jun_doc_mode, etc.
 def assess_symp(symptom):
     completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        engine = "Autogen"
         temperature=0.2,
         messages=[
             {"role": "system",
@@ -46,7 +47,7 @@ def assess_symp(symptom):
 
 def symptoms(symp):
     completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        engine="Autogen"
         temperature=0.2,
         messages=[
             {"role": "system",
@@ -93,7 +94,7 @@ def give_remedy(tokens):
         message_placeholder = st.empty()
         full_response = ""
         for response in openai.ChatCompletion.create(
-                model="gpt-3.5-turbo-16k",
+                engine="Autogen"
                 temperature=0.2,
                 messages=[
                     {"role": "system",

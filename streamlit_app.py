@@ -26,15 +26,11 @@ class TrackableUserProxyAgent(AssistantAgent):
     #     user_input = st.session_state.get('user_input', '
     
 # Load your API key from Streamlit secrets
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-openai.api_base = "https://asmi.openai.azure.com/"
-openai.api_type = "azure"
-openai.api_version = "2023-07-01-preview"
-# come back to it
+openai.api_key = st.secrets["OPENAI_API_KEY"]  # come back to it
 # Define your functions here: assess_symp, symptoms, home_remedies, give_remedy, jun_doc_mode, etc.
 def assess_symp(symptom):
     completion = openai.ChatCompletion.create(
-        engine = "Autogen",
+        model="gpt-3.5-turbo",
         temperature=0.2,
         messages=[
             {"role": "system",
@@ -47,7 +43,7 @@ def assess_symp(symptom):
 
 def symptoms(symp):
     completion = openai.ChatCompletion.create(
-        engine="Autogen",
+        model="gpt-3.5-turbo",
         temperature=0.2,
         messages=[
             {"role": "system",
@@ -94,7 +90,7 @@ def give_remedy(tokens):
         message_placeholder = st.empty()
         full_response = ""
         for response in openai.ChatCompletion.create(
-                engine="Autogen",
+                model="gpt-3.5-turbo-16k",
                 temperature=0.2,
                 messages=[
                     {"role": "system",
@@ -163,7 +159,7 @@ if user_input:
     with st.chat_message("user"):
         st.markdown(user_input)
     st.session_state.messages.append({'role':'user','content':user_input})
-    config = [{"api_key": openai.api_key,"engine":"Autogen","api_base":"https://asmi.openai.azure.com/","api_type":"azure","api_version":"2023-07-01-preview"}]
+    config = [{"model": "gpt-4", "api_key": openai.api_key}]
     llm_config = {"config_list": config, "temperature": 0.1}
     if st.session_state.junior_doctor_mode==True:
         tokens = symptoms(user_input)
@@ -186,7 +182,3 @@ if user_input:
         remedies = give_remedy(tokens)
         with st.chat_message("assistant"):
             st.markdown(remedies)
-
-
-
-

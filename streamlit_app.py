@@ -11,12 +11,14 @@ from autogen import UserProxyAgent, ConversableAgent, oai, config_list_from_json
 st.write("""# Healthcare Chatbot""")
 # Initialize session state for chat history
 if 'chat_history' not in st.session_state:
-    for role, text in message.items():
-        with st.chat_message(role):
-            st.markdown(text)
+    st.session_state['chat_history'] = []
+    
 for message in st.session_state['chat_history']:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    for role, text in message.items():
+        
+        with st.chat_message(role):
+            
+            st.markdown(text)
 class TrackableUserProxyAgent(AssistantAgent):
     def _process_received_message(self, message, sender, silent):
         with st.chat_message('assistant'):

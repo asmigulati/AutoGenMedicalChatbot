@@ -8,21 +8,17 @@ import sys
 import autogen
 from autogen import UserProxyAgent, ConversableAgent, oai, config_list_from_json, AssistantAgent, GroupChatManager
 
-st.write("""# Healthcare Chatbot""")
+st.write("""# Healthcare Chatbot 🩺""")
 # Initialize session state for chat history
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+if "junior_doctor_mode" not in st.session_state:
+    st.session_state.junior_doctor_mode = False
 
 class TrackableUserProxyAgent(AssistantAgent):
     def _process_received_message(self, message, sender, silent):
-        with st.chat_message('assistant'):
-            st.markdown(message['content'])
-            st.session_state.messages.append({'role': 'assistant', 'content': message['content']})
+        st.session_state.messages.append({'role': 'assistant', 'content': message['content']})
         return super()._process_received_message(message, sender, silent)
     # def get_human_input(self,prompt):
     #     user_input = st.session_state.get('user_input', '
@@ -150,15 +146,26 @@ def jun_doc_mode(tokens, user_input):
 
     # Run the asynchronous function within the event loop
     loop.run_until_complete(initiate_chat())
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 with st.container():
     hist_dict = {}
+    with st.chat_message("assistant"):
+        st.markdown("How can I help you today?")
     user_input = st.chat_input("What is up?")
     if user_input:
         st.session_state.messages.append({'role':'user','content':user_input})
-        with st.chat_message("user"):
-            st.markdown(user_input)
         config = [{"model": "gpt-4", "api_key": openai.api_key}]
         llm_config = {"config_list": config, "temperature": 0.1}
+        if st.session_state.junior_doctor_mode:
+            tokens = symptoms(user_input)
+            jun_doc_mode(tokens, user_input)
+            with st.chat_message("assistant"):
+                st.markdown("Advice while waiting for the doctor:")
+            remedies = give_remedy(tokens)
+            with st.chat_message("assistant"):
+                st.markdown(remedies)
         ans, user_input = assess_symp(user_input)
         if ans == "No":
             tokens = symptoms(user_input)
@@ -171,5 +178,6 @@ with st.container():
             remedies = give_remedy(tokens)
             with st.chat_message("assistant"):
                 st.markdown(remedies)
+
 
 

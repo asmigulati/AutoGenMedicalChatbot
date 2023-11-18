@@ -34,13 +34,6 @@ class TrackableGroupChatManager(GroupChatManager):
             st.session_state['user_input'] = user_input
         return user_input
     
-class TrackableUserProxyAgent(UserProxyAgent):
-    def _process_received_message(self, message, sender, silent):
-        with st.chat_message(sender.name):
-            st.markdown(message['content'])
-        return super()._process_received_message(message, sender, silent)
-
-
 # Load your API key from Streamlit secrets
 openai.api_key = st.secrets["OPENAI_API_KEY"]  # come back to it
 # Define your functions here: assess_symp, symptoms, home_remedies, give_remedy, jun_doc_mode, etc.
@@ -126,8 +119,6 @@ def give_remedy(tokens):
 
 
 def jun_doc_mode(tokens, user_input):
-    hist_dict = {}
-    autogen.ChatCompletion.start_logging(history_dict=hist_dict)
     junior_doc = TrackableAssistantAgent(name="junior_doc",
                                          llm_config=llm_config,
                                          is_termination_msg=lambda x: x.get("content", "").rstrip().endswith(
@@ -167,6 +158,8 @@ def jun_doc_mode(tokens, user_input):
     # Run the asynchronous function within the event loop
     loop.run_until_complete(initiate_chat())
 with st.container():
+    hist_dict = {}
+    autogen.ChatCompletion.start_logging(history_dict=hist_dict)
     user_input = st.chat_input("What is up?")
     if user_input:
         with st.chat_message("user"):

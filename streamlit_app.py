@@ -13,7 +13,7 @@ st.write("""# Healthcare Chatbot""")
 if 'chat_history' not in st.session_state:
     for role, text in message.items():
         with st.chat_message(role):
-        st.markdown(text)
+            st.markdown(text)
 for message in st.session_state['chat_history']:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])

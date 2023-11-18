@@ -156,6 +156,8 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 user_input = st.chat_input("What is up?")
 if user_input:
+    with st.chat_message("user"):
+        st.markdown(user_input)
     st.session_state.messages.append({'role':'user','content':user_input})
     config = [{"model": "gpt-4", "api_key": openai.api_key}]
     llm_config = {"config_list": config, "temperature": 0.1}

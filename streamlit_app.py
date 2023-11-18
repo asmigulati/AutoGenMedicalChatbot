@@ -26,7 +26,9 @@ class TrackableUserProxyAgent(AssistantAgent):
     #     user_input = st.session_state.get('user_input', '
     
 # Load your API key from Streamlit secrets
-openai.api_key = st.secrets["OPENAI_API_KEY"]  # come back to it
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_base = "https://asmi.openai.azure.com/"
+# come back to it
 # Define your functions here: assess_symp, symptoms, home_remedies, give_remedy, jun_doc_mode, etc.
 def assess_symp(symptom):
     completion = openai.ChatCompletion.create(

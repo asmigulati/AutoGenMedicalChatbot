@@ -27,7 +27,6 @@ class TrackableUserProxyAgent(UserProxyAgent):
 
 # Load your API key from Streamlit secrets
 openai.api_key = st.secrets["OPENAI_API_KEY"]  # come back to it
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 with st.container():
     user_input = st.chat_input("What is up?")
